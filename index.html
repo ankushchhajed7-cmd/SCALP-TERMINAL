@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0A0A0A">
+<title>SCALP TERMINAL</title>
+<link rel="manifest" href='data:application/manifest+json,{"name":"Scalp Terminal","short_name":"SCALP","start_url":"./","display":"standalone","background_color":"%230A0A0A","theme_color":"%230A0A0A","icons":[{"src":"data:image/svg%2Bxml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 192 192%27%3E%3Crect width=%27192%27 height=%27192%27 fill=%27%230A0A0A%27/%3E%3Ctext x=%2796%27 y=%27128%27 font-family=%27monospace%27 font-size=%2790%27 font-weight=%27bold%27 fill=%27%23FFB800%27 text-anchor=%27middle%27%3ES%3C/text%3E%3C/svg%3E","sizes":"192x192","type":"image/svg+xml"}]}'>
+<style>
+:root{
+  --bg:#0A0A0A; --panel:#111; --line:#222; --line2:#2E2E2E;
+  --amber:#FFB800; --amber-dim:#7A5800;
+  --buy:#00FF88; --sell:#FF3B30;
+  --txt:#D8D8D8; --dim:#666; --dim2:#444;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg); color:var(--txt);
+  font-family:"Courier New",Consolas,monospace;
+  font-size:13px; line-height:1.45;
+  padding-bottom:env(safe-area-inset-bottom);
+}
+.wrap{max-width:760px;margin:0 auto;padding:0 10px 40px}
+
+/* ---------- header ---------- */
+header{
+  position:sticky;top:0;z-index:20;background:var(--bg);
+  border-bottom:1px solid var(--line);padding:10px 0 8px;
+}
+.brand{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+h1{
+  font-size:15px;font-weight:bold;color:var(--amber);
+  letter-spacing:3px;margin:0;
+}
+.clock{font-size:11px;color:var(--dim);letter-spacing:1px}
+.statline{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;align-items:center}
+.pill{
+  border:1px solid var(--line2);padding:2px 7px;font-size:10px;
+  letter-spacing:1px;color:var(--dim);white-space:nowrap;
+}
+.pill.on{border-color:var(--buy);color:var(--buy)}
+.pill.off{border-color:var(--dim2);color:var(--dim2)}
+.pill.warn{border-color:var(--sell);color:var(--sell)}
+
+/* credit gauge */
+.gauge{flex:1;min-width:110px;height:14px;border:1px solid var(--line2);position:relative}
+.gauge i{
+  position:absolute;left:0;top:0;bottom:0;background:var(--amber-dim);
+  transition:width .4s ease;
+}
+.gauge span{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-size:9px;letter-spacing:1px;color:var(--txt);
+}
+
+/* ---------- buttons ---------- */
+button{
+  font-family:inherit;font-size:11px;letter-spacing:1.5px;
+  background:transparent;color:var(--amber);
+  border:1px solid var(--amber);padding:7px 14px;cursor:pointer;
+}
+button:active{background:var(--amber);color:#000}
+button:disabled{border-color:var(--dim2);color:var(--dim2)}
+button.ghost{border-color:var(--line2);color:var(--dim)}
+button.ghost:active{background:var(--line2);color:var(--txt)}
+button:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+.row{display:flex;gap:8px;margin:10px 0;flex-wrap:wrap}
+
+/* ---------- sections ---------- */
+.sec{margin-top:18px}
+.sec>h2{
+  font-size:10px;letter-spacing:2px;color:var(--dim);
+  border-bottom:1px solid var(--line);padding-bottom:5px;margin:0 0 10px;
+  font-weight:normal;display:flex;justify-content:space-between;
+}
+
+/* ---------- signal card ---------- */
+.card{border:1px solid var(--line2);background:var(--panel);margin-bottom:10px}
+.card.buy{border-left:3px solid var(--buy)}
+.card.sell{border-left:3px solid var(--sell)}
+.card.done{opacity:.5}
+.chead{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;border-bottom:1px solid var(--line)}
+.pair{font-size:15px;font-weight:bold;letter-spacing:1px;color:var(--txt)}
+.dir{font-size:11px;font-weight:bold;letter-spacing:2px;padding:2px 8px;border:1px solid}
+.dir.buy{color:var(--buy);border-color:var(--buy)}
+.dir.sell{color:var(--sell);border-color:var(--sell)}
+.levels{display:grid;grid-template-columns:repeat(3,1fr);border-bottom:1px solid var(--line)}
+.lv{padding:7px 10px;border-right:1px solid var(--line)}
+.lv:last-child{border-right:0}
+.lv b{display:block;font-size:9px;letter-spacing:1.5px;color:var(--dim);font-weight:normal}
+.lv span{font-size:14px}
+.lv.tp span{color:var(--buy)} .lv.sl span{color:var(--sell)}
+.meta{display:flex;gap:5px;padding:7px 10px;flex-wrap:wrap;font-size:10px;color:var(--dim)}
+.meta em{font-style:normal;color:var(--txt)}
+.conf{display:flex;align-items:center;gap:8px;padding:0 10px 8px}
+.confbar{flex:1;height:3px;background:var(--line2)}
+.confbar i{display:block;height:100%;background:var(--amber)}
+.acts{display:flex;border-top:1px solid var(--line)}
+.acts button{flex:1;border:0;border-right:1px solid var(--line);padding:9px 0}
+.acts button:last-child{border-right:0}
+.acts .w{color:var(--buy)} .acts .l{color:var(--sell)}
+
+/* ---------- log ---------- */
+.log{border:1px solid var(--line);background:var(--panel);max-height:170px;overflow-y:auto;padding:7px 9px;font-size:10px}
+.log div{color:var(--dim);padding:1px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.log div.hit{color:var(--amber)}
+.log div.err{color:var(--sell)}
+
+/* ---------- stats ---------- */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--line2)}
+.st{padding:9px 6px;text-align:center;border-right:1px solid var(--line)}
+.st:last-child{border-right:0}
+.st b{display:block;font-size:9px;letter-spacing:1px;color:var(--dim);font-weight:normal;margin-bottom:3px}
+.st span{font-size:16px;color:var(--txt)}
+.pos{color:var(--buy)!important} .neg{color:var(--sell)!important}
+
+/* ---------- settings ---------- */
+.set{display:none;border:1px solid var(--line2);background:var(--panel);padding:12px}
+.set.open{display:block}
+.f{display:flex;align-items:center;gap:8px;margin-bottom:9px}
+.f label{flex:1;font-size:10px;letter-spacing:1px;color:var(--dim)}
+.f input{
+  width:118px;background:#000;border:1px solid var(--line2);color:var(--amber);
+  font-family:inherit;font-size:12px;padding:5px 7px;
+}
+.f input:focus{outline:none;border-color:var(--amber)}
+.f input.wide{width:100%}
+.note{font-size:10px;color:var(--dim);line-height:1.6;margin-top:10px;border-top:1px solid var(--line);padding-top:9px}
+.empty{color:var(--dim2);font-size:11px;padding:18px 0;text-align:center;letter-spacing:1px}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="brand">
+    <h1>SCALP TERMINAL</h1>
+    <div class="clock" id="clock">--:--:-- IST</div>
+  </div>
+  <div class="statline">
+    <div class="pill off" id="pStatus">IDLE</div>
+    <div class="pill off" id="pSession">SESSION</div>
+    <div class="gauge"><i id="gFill" style="width:0%"></i><span id="gTxt">0 / 780</span></div>
+  </div>
+</header>
+
+<div class="row">
+  <button id="btnRun">START SCAN</button>
+  <button class="ghost" id="btnOnce">SCAN NOW</button>
+  <button class="ghost" id="btnSet">SETTINGS</button>
+</div>
+
+<div class="set" id="setPanel">
+  <div class="f"><label>TWELVEDATA API KEY</label></div>
+  <div class="f"><input class="wide" id="sKey" placeholder="paste key"></div>
+  <div class="f"><label>TELEGRAM BOT TOKEN</label></div>
+  <div class="f"><input class="wide" id="sTgToken" placeholder="optional"></div>
+  <div class="f"><label>TELEGRAM CHAT ID</label><input id="sTgChat" placeholder="optional"></div>
+  <div class="f"><label>LOT SIZE</label><input id="sLot" type="number" step="0.01"></div>
+  <div class="f"><label>TP PIPS</label><input id="sTp" type="number" step="0.5"></div>
+  <div class="f"><label>SL PIPS</label><input id="sSl" type="number" step="0.5"></div>
+  <div class="f"><label>ADX MAX (M15)</label><input id="sAdx" type="number"></div>
+  <div class="f"><label>RSI OVERSOLD</label><input id="sRsiL" type="number"></div>
+  <div class="f"><label>RSI OVERBOUGHT</label><input id="sRsiH" type="number"></div>
+  <div class="f"><label>MAX SPREAD PIPS</label><input id="sSpread" type="number" step="0.1"></div>
+  <div class="f"><label>SESSION START (IST)</label><input id="sSs" type="number"></div>
+  <div class="f"><label>SESSION END (IST)</label><input id="sSe" type="number"></div>
+  <div class="row">
+    <button id="btnSave">SAVE</button>
+    <button class="ghost" id="btnExport">EXPORT LOG</button>
+    <button class="ghost" id="btnReset">RESET STATS</button>
+  </div>
+  <div class="note">
+    Batch call ka credit har symbol pe lagta hai — 6 pairs = 6 credits per scan.
+    Scan M5 candle close pe chalta hai, 9 ghante = ~648 credits/day.
+    Session window badhaoge to budget cross ho sakta hai.
+  </div>
+</div>
+
+<div class="sec">
+  <h2><span>PAPER RESULTS — TODAY</span><span id="stDate"></span></h2>
+  <div class="stats">
+    <div class="st"><b>SIGNALS</b><span id="stSig">0</span></div>
+    <div class="st"><b>WIN</b><span id="stWin" class="pos">0</span></div>
+    <div class="st"><b>LOSS</b><span id="stLoss" class="neg">0</span></div>
+    <div class="st"><b>NET</b><span id="stNet">$0.00</span></div>
+  </div>
+</div>
+
+<div class="sec">
+  <h2><span>LIVE SIGNALS</span><span id="sigCount">0</span></h2>
+  <div id="signals"><div class="empty">NO SIGNALS YET</div></div>
+</div>
+
+<div class="sec">
+  <h2><span>SCAN LOG</span><span id="lastScan">—</span></h2>
+  <div class="log" id="log"></div>
+</div>
+
+</div>
+
+<script>
+/* ============================================================
+   SCALP ENGINE v1.000 — embedded
+   Credit note: TwelveData batch = 1 credit PER SYMBOL.
+   M15 ADX is aggregated locally from M5 to avoid a 2nd call.
+   ============================================================ */
+const NS='SCALP_v1_';
+
+const CONFIG={
+  apiKey:'',
+  telegramToken:'', telegramChat:'',
+  pairs:['EUR/USD','GBP/USD','USD/JPY','AUD/USD','USD/CAD','USD/CHF'],
+  sessionStartHour:12, sessionEndHour:21,
+  bbPeriod:20, bbStdDev:2,
+  rsiPeriod:7, rsiOversold:25, rsiOverbought:75,
+  adxPeriod:14, adxMax:25,
+  tpPips:5, slPips:8, lot:0.01,
+  maxSpreadPips:1.5, cooldownMin:15,
+  candlesNeeded:200, dailyCreditCap:780
+};
+
+const store={
+  get(k,f){try{const v=localStorage.getItem(NS+k);return v?JSON.parse(v):f}catch{return f}},
+  set(k,v){try{localStorage.setItem(NS+k,JSON.stringify(v))}catch{}}
+};
+
+const credits={
+  today(){const d=new Date().toISOString().slice(0,10);
+    const r=store.get('credits',{date:d,used:0});
+    if(r.date!==d){const f={date:d,used:0};store.set('credits',f);return f}return r},
+  spend(n){const r=this.today();r.used+=n;store.set('credits',r);return r.used},
+  remaining(){return CONFIG.dailyCreditCap-this.today().used}
+};
+
+/* ---- indicators ---- */
+function sma(a,p){if(a.length<p)return null;let s=0;for(let i=a.length-p;i<a.length;i++)s+=a[i];return s/p}
+function stdDev(a,p,m){if(a.length<p)return null;let s=0;for(let i=a.length-p;i<a.length;i++)s+=(a[i]-m)**2;return Math.sqrt(s/p)}
+function bollinger(c,p,m){const mid=sma(c,p);if(mid===null)return null;const sd=stdDev(c,p,mid);
+  return{mid,upper:mid+m*sd,lower:mid-m*sd,width:m*sd*2}}
+
+function rsi(c,p){
+  if(c.length<p+1)return null;
+  let g=0,l=0;
+  for(let i=1;i<=p;i++){const d=c[i]-c[i-1];d>0?g+=d:l-=d}
+  let ag=g/p,al=l/p;
+  for(let i=p+1;i<c.length;i++){const d=c[i]-c[i-1];
+    ag=(ag*(p-1)+(d>0?d:0))/p; al=(al*(p-1)+(d<0?-d:0))/p}
+  if(al===0)return 100;
+  return 100-100/(1+ag/al);
+}
+
+function adx(cd,p){
+  if(cd.length<p*2+1)return null;
+  const tr=[],pd=[],nd=[];
+  for(let i=1;i<cd.length;i++){
+    const c=cd[i],q=cd[i-1];
+    tr.push(Math.max(c.high-c.low,Math.abs(c.high-q.close),Math.abs(c.low-q.close)));
+    const up=c.high-q.high,dn=q.low-c.low;
+    pd.push(up>dn&&up>0?up:0); nd.push(dn>up&&dn>0?dn:0);
+  }
+  const w=s=>{let sum=0;for(let i=0;i<p;i++)sum+=s[i];const o=[sum];
+    for(let i=p;i<s.length;i++){sum=sum-sum/p+s[i];o.push(sum)}return o};
+  const t=w(tr),P=w(pd),N=w(nd),dx=[];
+  for(let i=0;i<t.length;i++){
+    if(t[i]===0){dx.push(0);continue}
+    const a=100*P[i]/t[i],b=100*N[i]/t[i],s=a+b;
+    dx.push(s===0?0:100*Math.abs(a-b)/s);
+  }
+  if(dx.length<p)return null;
+  let v=0;for(let i=0;i<p;i++)v+=dx[i];v/=p;
+  for(let i=p;i<dx.length;i++)v=(v*(p-1)+dx[i])/p;
+  return v;
+}
+
+/* M5 -> M15 locally. Saves a whole API call per scan. */
+function aggregateM15(m5){
+  const b=new Map();
+  for(const c of m5){
+    const t=new Date(c.time);
+    const k=Date.UTC(t.getUTCFullYear(),t.getUTCMonth(),t.getUTCDate(),
+                     t.getUTCHours(),Math.floor(t.getUTCMinutes()/15)*15);
+    if(!b.has(k))b.set(k,{time:k,high:c.high,low:c.low,close:c.close,n:1});
+    else{const x=b.get(k);x.high=Math.max(x.high,c.high);x.low=Math.min(x.low,c.low);x.close=c.close;x.n++}
+  }
+  return [...b.values()].sort((a,c)=>a.time-c.time)
+    .filter((x,i,arr)=>i<arr.length-1||x.n===3);
+}
+
+const pipSize=s=>s.includes('JPY')?0.01:0.0001;
+
+/* pip value in USD for the configured lot */
+function pipValue(pair,price,lot){
+  const units=lot*100000, pip=pipSize(pair);
+  const quote=pair.split('/')[1];
+  if(quote==='USD') return units*pip;          // EUR/USD, GBP/USD, AUD/USD
+  return units*pip/price;                       // USD/JPY, USD/CAD, USD/CHF
+}
+
+/* ---- api ---- */
+async function fetchBatch(pairs){
+  if(credits.remaining()<pairs.length)
+    throw new Error('credit budget khatam ('+credits.remaining()+' bache)');
+  const url='https://api.twelvedata.com/time_series?symbol='+encodeURIComponent(pairs.join(','))
+    +'&interval=5min&outputsize='+CONFIG.candlesNeeded+'&apikey='+CONFIG.apiKey+'&format=JSON';
+  const res=await fetch(url);
+  if(!res.ok)throw new Error('API '+res.status);
+  const j=await res.json();
+  credits.spend(pairs.length);
+  const raw=pairs.length===1?{[pairs[0]]:j}:j;
+  const out={};
+  for(const p of pairs){
+    const n=raw[p];
+    if(!n||n.status==='error'||!Array.isArray(n.values)){out[p]={error:(n&&n.message)||'no data'};continue}
+    out[p]={candles:n.values.slice().reverse().map(v=>({
+      time:(v.datetime.includes('T')?v.datetime:v.datetime.replace(' ','T'))+'Z',
+      open:+v.open,high:+v.high,low:+v.low,close:+v.close
+    }))};
+  }
+  return out;
+}
+
+/* ---- filters ---- */
+function istNow(){const n=new Date();return new Date(n.getTime()+(330+n.getTimezoneOffset())*60000)}
+function inSession(){const h=istNow().getHours();return h>=CONFIG.sessionStartHour&&h<CONFIG.sessionEndHour}
+function onCooldown(p){const c=store.get('cooldown',{});return c[p]&&Date.now()-c[p]<CONFIG.cooldownMin*60000}
+function markCooldown(p){const c=store.get('cooldown',{});c[p]=Date.now();store.set('cooldown',c)}
+
+let spreadProvider=async()=>null;
+
+/* ---- evaluate ---- */
+async function evaluate(pair,candles){
+  const closes=candles.map(c=>c.close), last=candles[candles.length-1], pip=pipSize(pair);
+  const bb=bollinger(closes,CONFIG.bbPeriod,CONFIG.bbStdDev);
+  const r=rsi(closes.slice(-(CONFIG.rsiPeriod*6)),CONFIG.rsiPeriod);
+  const adxVal=adx(aggregateM15(candles),CONFIG.adxPeriod);
+
+  if(bb===null||r===null||adxVal===null)return{signal:null,reason:'not enough data'};
+  if(adxVal>=CONFIG.adxMax)return{signal:null,reason:'trending ADX '+adxVal.toFixed(1)};
+
+  let dir=null;
+  if(last.close<=bb.lower&&r<CONFIG.rsiOversold)dir='BUY';
+  else if(last.close>=bb.upper&&r>CONFIG.rsiOverbought)dir='SELL';
+  if(!dir)return{signal:null,reason:'no setup  rsi '+r.toFixed(0)+'  adx '+adxVal.toFixed(0)};
+
+  const sp=await spreadProvider(pair);
+  const spP=sp===null?null:sp/pip;
+  if(spP!==null&&spP>CONFIG.maxSpreadPips)return{signal:null,reason:'spread '+spP.toFixed(1)+'p wide'};
+
+  const e=last.close, dg=pair.includes('JPY')?3:5;
+  const tp=dir==='BUY'?e+CONFIG.tpPips*pip:e-CONFIG.tpPips*pip;
+  const sl=dir==='BUY'?e-CONFIG.slPips*pip:e+CONFIG.slPips*pip;
+
+  const band=dir==='BUY'?bb.lower:bb.upper;
+  const ex=Math.min(Math.abs(e-band)/(bb.width/4),1);
+  const rs=dir==='BUY'?Math.min((CONFIG.rsiOversold-r)/CONFIG.rsiOversold,1)
+                      :Math.min((r-CONFIG.rsiOverbought)/(100-CONFIG.rsiOverbought),1);
+  const as=1-adxVal/CONFIG.adxMax;
+
+  const pv=pipValue(pair,e,CONFIG.lot);
+  return{signal:{
+    id:pair+'_'+last.time+'_'+dir, pair, dir,
+    entry:+e.toFixed(dg), tp:+tp.toFixed(dg), sl:+sl.toFixed(dg),
+    rsi:+r.toFixed(1), adx:+adxVal.toFixed(1),
+    spreadPips:spP===null?null:+spP.toFixed(1),
+    confidence:Math.round(ex*30+rs*40+as*30),
+    winAmt:+(pv*CONFIG.tpPips).toFixed(2),
+    lossAmt:+(pv*CONFIG.slPips).toFixed(2),
+    candleTime:last.time, ts:Date.now(), result:null
+  }};
+}
+
+/* ---- scan ---- */
+async function scanOnce(){
+  const out={ts:Date.now(),signals:[],skipped:[],error:null};
+  if(!CONFIG.apiKey){out.error='API key set nahi hai';return out}
+  if(!inSession()){out.error='session band ('+CONFIG.sessionStartHour+'-'+CONFIG.sessionEndHour+' IST)';return out}
+  const active=CONFIG.pairs.filter(p=>!onCooldown(p));
+  if(!active.length){out.error='sab pairs cooldown pe';return out}
+
+  let data;
+  try{data=await fetchBatch(active)}catch(e){out.error=e.message;return out}
+
+  const seen=new Set(store.get('seenIds',[]));
+  for(const p of active){
+    const d=data[p];
+    if(d.error){out.skipped.push({pair:p,reason:d.error});continue}
+    const ev=await evaluate(p,d.candles);
+    if(!ev.signal){out.skipped.push({pair:p,reason:ev.reason});continue}
+    if(seen.has(ev.signal.id)){out.skipped.push({pair:p,reason:'duplicate'});continue}
+    seen.add(ev.signal.id); markCooldown(p); out.signals.push(ev.signal);
+  }
+  store.set('seenIds',[...seen].slice(-500));
+  return out;
+}
+
+/* ---- scheduler: fire 8s after each M5 close ---- */
+let timer=null;
+function msToNextCandle(){
+  const n=new Date(), ms=n.getMinutes()*60000+n.getSeconds()*1000+n.getMilliseconds();
+  return 300000-(ms%300000)+8000;
+}
+
+/* ============================================================
+   UI
+   ============================================================ */
+const $=id=>document.getElementById(id);
+let running=false;
+
+function loadCfg(){
+  const s=store.get('cfg',{});
+  Object.assign(CONFIG,s);
+  $('sKey').value=CONFIG.apiKey; $('sTgToken').value=CONFIG.telegramToken;
+  $('sTgChat').value=CONFIG.telegramChat; $('sLot').value=CONFIG.lot;
+  $('sTp').value=CONFIG.tpPips; $('sSl').value=CONFIG.slPips;
+  $('sAdx').value=CONFIG.adxMax; $('sRsiL').value=CONFIG.rsiOversold;
+  $('sRsiH').value=CONFIG.rsiOverbought; $('sSpread').value=CONFIG.maxSpreadPips;
+  $('sSs').value=CONFIG.sessionStartHour; $('sSe').value=CONFIG.sessionEndHour;
+}
+function saveCfg(){
+  CONFIG.apiKey=$('sKey').value.trim();
+  CONFIG.telegramToken=$('sTgToken').value.trim();
+  CONFIG.telegramChat=$('sTgChat').value.trim();
+  CONFIG.lot=+$('sLot').value||0.01;
+  CONFIG.tpPips=+$('sTp').value||5; CONFIG.slPips=+$('sSl').value||8;
+  CONFIG.adxMax=+$('sAdx').value||25;
+  CONFIG.rsiOversold=+$('sRsiL').value||25; CONFIG.rsiOverbought=+$('sRsiH').value||75;
+  CONFIG.maxSpreadPips=+$('sSpread').value||1.5;
+  CONFIG.sessionStartHour=+$('sSs').value; CONFIG.sessionEndHour=+$('sSe').value;
+  store.set('cfg',{
+    apiKey:CONFIG.apiKey,telegramToken:CONFIG.telegramToken,telegramChat:CONFIG.telegramChat,
+    lot:CONFIG.lot,tpPips:CONFIG.tpPips,slPips:CONFIG.slPips,adxMax:CONFIG.adxMax,
+    rsiOversold:CONFIG.rsiOversold,rsiOverbought:CONFIG.rsiOverbought,
+    maxSpreadPips:CONFIG.maxSpreadPips,
+    sessionStartHour:CONFIG.sessionStartHour,sessionEndHour:CONFIG.sessionEndHour
+  });
+  log('settings saved','hit'); paint();
+}
+
+function log(msg,cls){
+  const l=$('log'), d=document.createElement('div');
+  d.className=cls||''; 
+  d.textContent=istNow().toTimeString().slice(0,8)+'  '+msg;
+  l.insertBefore(d,l.firstChild);
+  while(l.children.length>120)l.removeChild(l.lastChild);
+}
+
+function todayKey(){return istNow().toISOString().slice(0,10)}
+function getSignals(){
+  const s=store.get('signals',{date:todayKey(),list:[]});
+  if(s.date!==todayKey()){const f={date:todayKey(),list:[]};store.set('signals',f);return f}
+  return s;
+}
+function putSignals(s){store.set('signals',s)}
+
+function paint(){
+  // header
+  $('pStatus').textContent=running?'SCANNING':'IDLE';
+  $('pStatus').className='pill '+(running?'on':'off');
+  const ses=inSession();
+  $('pSession').textContent=ses?'SESSION OPEN':'SESSION CLOSED';
+  $('pSession').className='pill '+(ses?'on':'off');
+
+  const used=credits.today().used, pct=Math.min(100,used/CONFIG.dailyCreditCap*100);
+  $('gFill').style.width=pct+'%';
+  $('gTxt').textContent=used+' / '+CONFIG.dailyCreditCap+' CR';
+
+  // stats
+  const s=getSignals();
+  $('stDate').textContent=s.date;
+  $('stSig').textContent=s.list.length;
+  const w=s.list.filter(x=>x.result==='W'), l=s.list.filter(x=>x.result==='L');
+  $('stWin').textContent=w.length; $('stLoss').textContent=l.length;
+  const net=w.reduce((a,x)=>a+x.winAmt,0)-l.reduce((a,x)=>a+x.lossAmt,0);
+  const n=$('stNet');
+  n.textContent=(net<0?'-$':'$')+Math.abs(net).toFixed(2);
+  n.className=net>0?'pos':net<0?'neg':'';
+
+  // cards
+  $('sigCount').textContent=s.list.length;
+  const box=$('signals');
+  if(!s.list.length){box.innerHTML='<div class="empty">NO SIGNALS YET</div>';return}
+  box.innerHTML='';
+  [...s.list].reverse().forEach(sig=>box.appendChild(card(sig)));
+}
+
+function card(sig){
+  const d=sig.dir.toLowerCase(), el=document.createElement('div');
+  el.className='card '+d+(sig.result?' done':'');
+  const t=new Date(sig.ts);
+  const ist=new Date(t.getTime()+(330+t.getTimezoneOffset())*60000).toTimeString().slice(0,5);
+  el.innerHTML=
+    '<div class="chead"><div class="pair">'+sig.pair+'</div>'+
+      '<div class="dir '+d+'">'+sig.dir+'</div></div>'+
+    '<div class="levels">'+
+      '<div class="lv"><b>ENTRY</b><span>'+sig.entry+'</span></div>'+
+      '<div class="lv tp"><b>TP +'+CONFIG.tpPips+'p</b><span>'+sig.tp+'</span></div>'+
+      '<div class="lv sl"><b>SL -'+CONFIG.slPips+'p</b><span>'+sig.sl+'</span></div>'+
+    '</div>'+
+    '<div class="meta">'+
+      '<div>RSI <em>'+sig.rsi+'</em></div><div>ADX <em>'+sig.adx+'</em></div>'+
+      '<div>SPRD <em>'+(sig.spreadPips===null?'n/a':sig.spreadPips+'p')+'</em></div>'+
+      '<div>WIN <em>$'+sig.winAmt+'</em></div><div>RISK <em>$'+sig.lossAmt+'</em></div>'+
+      '<div>'+ist+'</div>'+
+    '</div>'+
+    '<div class="conf"><span style="font-size:9px;color:var(--dim)">CONF</span>'+
+      '<div class="confbar"><i style="width:'+sig.confidence+'%"></i></div>'+
+      '<span style="font-size:10px">'+sig.confidence+'</span></div>';
+
+  if(!sig.result){
+    const a=document.createElement('div'); a.className='acts';
+    const bw=document.createElement('button'); bw.className='w'; bw.textContent='WIN';
+    const bl=document.createElement('button'); bl.className='l'; bl.textContent='LOSS';
+    const bc=document.createElement('button'); bc.textContent='COPY';
+    bw.onclick=()=>mark(sig.id,'W'); bl.onclick=()=>mark(sig.id,'L');
+    bc.onclick=()=>copy(sig);
+    a.append(bw,bl,bc); el.appendChild(a);
+  }
+  return el;
+}
+
+function mark(id,res){
+  const s=getSignals();
+  const x=s.list.find(v=>v.id===id);
+  if(x){x.result=res;putSignals(s);paint();log(x.pair+' marked '+(res==='W'?'WIN':'LOSS'),'hit')}
+}
+
+function copy(sig){
+  const txt=sig.pair.replace('/','')+'m  '+sig.dir+'  entry '+sig.entry+
+            '  TP '+sig.tp+'  SL '+sig.sl+'  lot '+CONFIG.lot;
+  navigator.clipboard?.writeText(txt).then(()=>log('copied: '+sig.pair,'hit'))
+    .catch(()=>log('copy fail','err'));
+}
+
+async function telegram(sig){
+  if(!CONFIG.telegramToken||!CONFIG.telegramChat)return;
+  const m='SCALP '+sig.dir+'  '+sig.pair+'\nEntry '+sig.entry+'\nTP '+sig.tp+
+          '\nSL '+sig.sl+'\nRSI '+sig.rsi+'  ADX '+sig.adx+'  Conf '+sig.confidence;
+  try{
+    await fetch('https://api.telegram.org/bot'+CONFIG.telegramToken+'/sendMessage',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({chat_id:CONFIG.telegramChat,text:m})});
+  }catch{log('telegram send fail','err')}
+}
+
+async function runScan(){
+  log('scanning '+CONFIG.pairs.length+' pairs...');
+  const r=await scanOnce();
+  $('lastScan').textContent=istNow().toTimeString().slice(0,5);
+
+  if(r.error){log(r.error,'err');paint();return}
+  r.skipped.forEach(s=>log(s.pair+'  —  '+s.reason));
+
+  if(r.signals.length){
+    const s=getSignals();
+    r.signals.forEach(sig=>{s.list.push(sig);log('>> '+sig.dir+' '+sig.pair+'  conf '+sig.confidence,'hit');telegram(sig)});
+    putSignals(s);
+  }
+  paint();
+}
+
+function tick(){
+  runScan().finally(()=>{if(running)timer=setTimeout(tick,msToNextCandle())});
+}
+
+$('btnRun').onclick=()=>{
+  if(!CONFIG.apiKey){log('pehle API key daalo — SETTINGS','err');$('setPanel').classList.add('open');return}
+  running=!running;
+  $('btnRun').textContent=running?'STOP SCAN':'START SCAN';
+  if(running){log('engine started — next scan in '+Math.round(msToNextCandle()/1000)+'s','hit');
+    timer=setTimeout(tick,msToNextCandle());}
+  else{clearTimeout(timer);log('engine stopped')}
+  paint();
+};
+$('btnOnce').onclick=()=>runScan();
+$('btnSet').onclick=()=>$('setPanel').classList.toggle('open');
+$('btnSave').onclick=saveCfg;
+$('btnReset').onclick=()=>{
+  if(!confirm('Aaj ke signals aur stats clear karein?'))return;
+  store.set('signals',{date:todayKey(),list:[]});store.set('seenIds',[]);store.set('cooldown',{});
+  log('stats reset','hit');paint();
+};
+$('btnExport').onclick=()=>{
+  const s=getSignals();
+  const head='date,time,pair,dir,entry,tp,sl,rsi,adx,conf,result,amount\n';
+  const rows=s.list.map(x=>{
+    const t=new Date(x.ts), i=new Date(t.getTime()+(330+t.getTimezoneOffset())*60000);
+    const amt=x.result==='W'?x.winAmt:x.result==='L'?-x.lossAmt:0;
+    return [s.date,i.toTimeString().slice(0,8),x.pair,x.dir,x.entry,x.tp,x.sl,
+            x.rsi,x.adx,x.confidence,x.result||'OPEN',amt].join(',');
+  }).join('\n');
+  const b=new Blob([head+rows],{type:'text/csv'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(b); a.download='scalp_'+s.date+'.csv'; a.click();
+  log('CSV exported','hit');
+};
+
+setInterval(()=>{
+  $('clock').textContent=istNow().toTimeString().slice(0,8)+' IST';
+  const ses=inSession();
+  if(($('pSession').textContent==='SESSION OPEN')!==ses)paint();
+},1000);
+
+loadCfg(); paint(); log('terminal ready');
+</script>
+</body>
+</html>
